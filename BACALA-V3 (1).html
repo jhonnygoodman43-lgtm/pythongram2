@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1115">
+<title>Lapor Security SPX</title>
+<style>
+  :root{
+    --bg:#0d0f14; --card:#161a22; --card2:#1e2330;
+    --orange:#ff5722; --orange2:#ff8a3d;
+    --txt:#eef1f6; --muted:#8b93a7;
+    --line:#2a3040; --ok:#2ecc71; --err:#ff4d4d;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 500px at 50% -10%,#1a1030 0%,var(--bg) 55%);
+    color:var(--txt);min-height:100vh;padding:16px 14px 40px;
+  }
+  .wrap{max-width:520px;margin:0 auto}
+
+  /* ========== LOGIN SCREEN ========== */
+  #login-screen{
+    min-height:calc(100vh - 60px);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    animation:fadeIn .5s ease;
+  }
+  .login-logo{
+    width:96px;height:96px;border-radius:26px;
+    background:linear-gradient(135deg,var(--orange),var(--orange2));
+    display:grid;place-items:center;font-weight:800;color:#fff;font-size:44px;
+    box-shadow:0 10px 40px rgba(255,87,34,.45);margin-bottom:22px;
+  }
+  .spin-animation{animation:spin 1.8s linear}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){
+    .spin-animation{animation:none}
+    #login-screen,#main-app{animation:none}
+  }
+  #login-screen h1{font-size:20px;margin:0 0 4px;letter-spacing:.5px}
+  #login-screen .sub{font-size:12px;color:var(--muted);margin-bottom:28px}
+  .login-box{width:100%;max-width:340px}
+  .login-box input{
+    width:100%;padding:15px 16px;border-radius:14px;border:1px solid var(--line);
+    background:var(--card2);color:var(--txt);font-size:15px;font-weight:600;
+    outline:none;text-align:center;transition:.2s;
+  }
+  .login-box input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,87,34,.15)}
+  .btn-login{
+    width:100%;margin-top:12px;padding:15px;border:0;border-radius:14px;
+    font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;color:#fff;
+    background:linear-gradient(135deg,var(--orange),var(--orange2));
+    box-shadow:0 6px 18px rgba(255,87,34,.4);
+  }
+  .btn-login:disabled{opacity:.6}
+  #loginError{
+    display:none;margin-top:14px;color:var(--err);font-weight:800;
+    font-size:13px;letter-spacing:.5px;
+  }
+  #loginError.show{display:block;animation:shake .35s}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-6px)}
+    75%{transform:translateX(6px)}
+  }
+
+  /* ========== MAIN APP ========== */
+  #main-app{display:none;animation:fadeIn .5s ease}
+  .brand{display:flex;align-items:center;gap:10px;margin:6px 2px 16px}
+  .logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));
+    display:grid;place-items:center;font-weight:800;color:#fff;font-size:18px;box-shadow:0 6px 18px rgba(255,87,34,.35)}
+  .brand h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.3px}
+  .brand p{margin:0;font-size:11px;color:var(--muted)}
+
+  .tabs{display:flex;gap:8px;background:var(--card);padding:6px;border-radius:16px;margin-bottom:16px;border:1px solid var(--line)}
+  .tab{flex:1;padding:12px;border:0;border-radius:11px;background:transparent;color:var(--muted);
+    font-weight:700;font-size:13px;cursor:pointer;transition:.2s;letter-spacing:.3px}
+  .tab.active{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;box-shadow:0 4px 14px rgba(255,87,34,.4)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+  .row{margin-bottom:14px}
+  .row:last-child{margin-bottom:0}
+  label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:7px;letter-spacing:.6px;text-transform:uppercase}
+  input,select{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);
+    background:var(--card2);color:var(--txt);font-size:15px;font-weight:600;outline:none;transition:.2s}
+  input:focus,select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,87,34,.15)}
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%238b93a7' viewBox='0 0 16 16'><path d='M8 11L3 6h10z'/></svg>");
+    background-repeat:no-repeat;background-position:right 14px center}
+  .grid2{display:flex;gap:10px}
+  .grid2>div{flex:1}
+  .timebox{display:flex;gap:10px;align-items:flex-end}
+  .timebox .row{flex:1;margin:0}
+  .btn-mini{padding:13px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);
+    color:var(--orange2);font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
+
+  .infocard{background:linear-gradient(135deg,#1c1330,#161a22);display:flex;justify-content:space-between;align-items:center}
+  .infocard .d{font-size:14px;font-weight:800}
+  .infocard .g{font-size:12px;color:var(--orange2);font-weight:700;margin-top:3px}
+
+  .preview{background:#0b141a;border:1px solid #223;border-radius:18px;padding:16px}
+  .preview .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .preview .head span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+  pre{white-space:pre-wrap;word-wrap:break-word;font-family:"Segoe UI",Roboto,sans-serif;
+    font-size:13.5px;line-height:1.6;color:#e9edef;margin:0}
+  pre b{color:#fff;font-weight:800}
+  pre .mono{
+    display:block;font-family:"Courier New",Courier,monospace;font-size:12px;
+    background:#111b21;border-radius:8px;padding:8px 10px;margin:4px 0;
+    overflow-x:auto;white-space:pre;
+  }
+
+  .actions{display:flex;gap:10px;margin-top:14px}
+  .btn{flex:1;padding:15px;border:0;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:.4px}
+  .btn-copy{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;box-shadow:0 6px 18px rgba(255,87,34,.4)}
+  .btn-copy.done{background:linear-gradient(135deg,#2ecc71,#27ae60)}
+  .btn-clear{flex:0 0 auto;background:var(--card2);color:var(--muted);border:1px solid var(--line)}
+
+  .skipbox{
+    display:flex;align-items:center;gap:10px;margin-top:14px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
+  }
+  .skipbox input[type=checkbox]{
+    width:20px;height:20px;accent-color:var(--orange);flex:0 0 auto;padding:0;
+  }
+  .skipbox span{font-size:12.5px;color:var(--muted);font-weight:600}
+  .userbar{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:11.5px;color:var(--muted);margin:0 4px 12px;
+  }
+  .userbar b{color:var(--orange2)}
+  .userbar button{background:none;border:0;color:var(--muted);font-size:11.5px;
+    font-weight:700;cursor:pointer;text-decoration:underline}
+
+  .foot{text-align:center;color:var(--muted);font-size:10.5px;margin-top:18px;letter-spacing:.3px}
+  .copyright{text-align:center;margin-top:10px;font-size:11px;font-weight:700;
+    background:linear-gradient(135deg,var(--orange),var(--orange2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ BAGIAN A : LOGIN ============ -->
+  <div id="login-screen">
+    <div class="login-logo" id="loginLogo">S</div>
+    <h1>LAPOR SECURITY SPX</h1>
+    <div class="sub">Masukkan nama untuk melanjutkan</div>
+    <div class="login-box">
+      <input id="loginName" placeholder="Nama lengkap petugas"
+        onkeydown="if(event.key==='Enter')prosesLogin()">
+      <button class="btn-login" id="loginBtn" onclick="prosesLogin()">MASUK</button>
+      <div id="loginError">⛔ AKSES DITOLAK — nama tidak terdaftar</div>
+    </div>
+    <div class="copyright" style="margin-top:34px">© Copyright by Jhonny</div>
+  </div>
+
+  <!-- ============ BAGIAN B : APLIKASI UTAMA ============ -->
+  <div id="main-app">
+
+    <div class="brand">
+      <div class="logo">S</div>
+      <div>
+        <h1>LAPOR SECURITY SPX</h1>
+        <p>Report Barang Keluar & Masuk</p>
+      </div>
+    </div>
+
+    <div class="userbar">
+      <div>👮 Petugas aktif: <b id="userLabel">—</b></div>
+      <button onclick="logout()">Ganti akun</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tabKeluar" onclick="setMode('keluar')">🚚 BARANG KELUAR</button>
+      <button class="tab" id="tabMasuk" onclick="setMode('masuk')">📦 BARANG MASUK</button>
+    </div>
+
+    <div class="card infocard">
+      <div>
+        <div class="d" id="tglLabel">—</div>
+        <div class="g" id="salamLabel">—</div>
+      </div>
+      <div style="font-size:26px" id="salamEmoji">🌙</div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <label>Nama DC / Header</label>
+        <input id="dc" value="SPX EXPRESS ESB CIREBON 2 DC >< PT KJM" oninput="save();render()">
+      </div>
+
+      <div class="timebox">
+        <div class="row">
+          <label id="jamLabel">Jam Berangkat</label>
+          <input type="time" id="jam" oninput="render()">
+        </div>
+        <button class="btn-mini" onclick="jamSekarang()">⏱️ Sekarang</button>
+      </div>
+
+      <div class="row">
+        <label>Petugas</label>
+        <input id="petugas" placeholder="Mohammad Jonny Saputra" oninput="save();render()">
+      </div>
+
+      <div class="row">
+        <label>Kendaraan</label>
+        <div class="grid2">
+          <div>
+            <select id="jenis" onchange="save();render()">
+              <option>WINGBOX</option><option>CDDL</option><option>CDDE</option>
+              <option>CDDX</option><option>MOTOR</option><option>VAN</option>
+            </select>
+          </div>
+          <div>
+            <input id="plat" placeholder="B 9785 TFY" oninput="upper(this);save();render()">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Trip</label>
+        <input id="trip" placeholder="Cakung 5 DC" oninput="render()">
+      </div>
+    </div>
+
+    <div class="preview">
+      <div class="head"><span>PREVIEW LAPORAN</span><span id="modeTag">BARANG KELUAR</span></div>
+      <pre id="out"></pre>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-copy" id="copyBtn" onclick="salin()">📋 SALIN LAPORAN</button>
+      <button class="btn btn-clear" onclick="clearTrip()">🧹 Trip</button>
+    </div>
+
+    <div class="skipbox">
+      <input type="checkbox" id="skipLogin" onchange="toggleSkip()">
+      <span>Lewati login untuk seterusnya (langsung masuk ke aplikasi)</span>
+    </div>
+
+    <div class="foot">Otomatis simpan data • Data tersimpan di HP kamu</div>
+    <div class="copyright">© Copyright by Jhonny</div>
+  </div>
+
+</div>
+
+<script>
+  /* =====================================================
+     DAFTAR ANGGOTA — edit di sini untuk tambah petugas.
+     Tulis dengan HURUF BESAR semua.
+  ===================================================== */
+  var daftarUser = [
+    "MOHAMAD JONNY SAPUTRA",
+    "MOH ANDIKA",
+    "YUDA GUSTIANA",
+    "TRIS RIZKI AMIN",
+    "RIO FERDINAND",
+    "DENI SAPUTRA",
+    "AHMAD RAMADAN",
+    "M. FAHMI M. S"
+  ];
+
+  var mode='keluar';
+  var HARI=['Minggu','Senin','Selasa','Rabu','Kamis',"Jum'at",'Sabtu'];
+  var BULAN=['Januari','Februari','Maret','April','Mei','Juni',
+             'Juli','Agustus','September','Oktober','November','Desember'];
+  var PAD=15; // lebar kolom label di blok monospace
+
+  function pad(n){return n<10?'0'+n:''+n}
+  function upper(el){var s=el.selectionStart;el.value=el.value.toUpperCase();el.setSelectionRange(s,s)}
+  function titleCase(s){
+    return s.toLowerCase().replace(/(^|[\s'])\S/g,function(c){return c.toUpperCase()});
+  }
+
+  /* ============ LOGIN & INISIALISASI ============ */
+  function initApp(){
+    var skip = localStorage.getItem('spx_skipLogin')==='true';
+    var user = localStorage.getItem('spx_currentUser')||'';
+    if(skip && user){
+      masukAplikasi(user,false);
+    }
+  }
+
+  function prosesLogin(){
+    var input=document.getElementById('loginName').value.trim();
+    var err=document.getElementById('loginError');
+    err.classList.remove('show');
+    if(!input)return;
+
+    if(daftarUser.includes(input.toUpperCase())){
+      // nama valid → animasi logo 1.8 detik lalu pindah halaman
+      var logo=document.getElementById('loginLogo');
+      var btn=document.getElementById('loginBtn');
+      btn.disabled=true;
+      logo.classList.add('spin-animation');
+      setTimeout(function(){
+        logo.classList.remove('spin-animation');
+        btn.disabled=false;
+        masukAplikasi(input,true);
+      },1800);
+    }else{
+      err.classList.add('show');
+    }
+  }
+
+  function masukAplikasi(nama,simpan){
+    var namaRapi=titleCase(nama);
+    if(simpan)localStorage.setItem('spx_currentUser',namaRapi);
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    document.getElementById('petugas').value=namaRapi;
+    document.getElementById('userLabel').textContent=namaRapi;
+    document.getElementById('skipLogin').checked =
+      localStorage.getItem('spx_skipLogin')==='true';
+    save();render();
+  }
+
+  function toggleSkip(){
+    var on=document.getElementById('skipLogin').checked;
+    localStorage.setItem('spx_skipLogin', on?'true':'false');
+  }
+
+  function logout(){
+    localStorage.setItem('spx_skipLogin','false');
+    localStorage.removeItem('spx_currentUser');
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('loginName').value='';
+  }
+
+  /* ============ TANGGAL & SALAM ============ */
+  function hariNow(){return HARI[new Date().getDay()]}
+  function tanggalNow(){
+    var d=new Date();
+    return d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+  }
+  function salam(hhmm){
+    var h=parseInt(hhmm.split(':')[0],10);
+    if(h>=4 && h<10)  return {t:'SELAMAT PAGI KOMANDAN', e:'☀️'};
+    if(h>=10&& h<15)  return {t:'SELAMAT SIANG KOMANDAN',e:'🌤️'};
+    if(h>=15&& h<18)  return {t:'SELAMAT SORE KOMANDAN', e:'🌇'};
+    return {t:'SELAMAT MALAM KOMANDAN',e:'🌙'};
+  }
+  function jamSekarang(){
+    var d=new Date();
+    document.getElementById('jam').value=pad(d.getHours())+':'+pad(d.getMinutes());
+    render();
+  }
+
+  /* ============ MODE TAB ============ */
+  function setMode(m){
+    mode=m;
+    document.getElementById('tabKeluar').classList.toggle('active',m=='keluar');
+    document.getElementById('tabMasuk').classList.toggle('active',m=='masuk');
+    document.getElementById('jamLabel').textContent = m=='keluar'?'Jam Berangkat':'Jam Kedatangan';
+    document.getElementById('modeTag').textContent = m=='keluar'?'BARANG KELUAR':'BARANG MASUK';
+    render();
+  }
+
+  /* ============ RENDER LAPORAN (FORMAT BARU) ============ */
+  function baris(label,isi){
+    return label.padEnd(PAD,' ')+':'+isi;
+  }
+
+  function render(){
+    var dc=document.getElementById('dc').value.trim();
+    var jam=document.getElementById('jam').value||'00:00';
+    var pet=document.getElementById('petugas').value.trim();
+    var jns=document.getElementById('jenis').value;
+    var plt=document.getElementById('plat').value.trim();
+    var trp=document.getElementById('trip').value.trim();
+    var s=salam(jam);
+
+    document.getElementById('tglLabel').textContent=hariNow()+', '+tanggalNow();
+    document.getElementById('salamLabel').textContent=s.t;
+    document.getElementById('salamEmoji').textContent=s.e;
+
+    var judul   = mode=='keluar' ? '*Report Barang Keluar*' : '*Report Barang Masuk*';
+    var lapor   = mode=='keluar' ? '*Mohon Ijin Melaporkan Outbond*' : '*Mohon Ijin Melaporkan Inbond*';
+    var jamLbl  = mode=='keluar' ? 'JAM BERANGKAT' : 'JAM KEDATANGAN';
+    var sep='================================';
+
+    var blok =
+      baris('HARI',hariNow())+'\n'+
+      baris('TANGGAL',tanggalNow())+'\n'+
+      baris(jamLbl,jam+' WIB')+'\n'+
+      baris('PETUGAS',pet)+'\n'+
+      baris('TYPE KENDARAAN',jns)+'\n'+
+      baris('NO.POL',plt)+'\n'+
+      baris('TRIP',trp);
+
+    var txt =
+judul+'\n\n'+
+'🇮🇩 *'+s.t+'* 🇮🇩\n\n'+
+sep+'\n'+
+'*'+dc+'*\n'+
+sep+'\n\n'+
+lapor+'\n\n'+
+'```'+blok+'```\n\n'+
+'BERIKUT DOKUMEN YANG TERLAMPIR 👇\n\n'+
+'TERIMAKASIH 🙏';
+
+    window._raw=txt;
+
+    // Render preview: *bold* dan ```monospace```
+    var html=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    html=html.replace(/```([\s\S]+?)```/g,'<span class="mono">$1</span>');
+    html=html.replace(/\*(.+?)\*/g,'<b>$1</b>');
+    document.getElementById('out').innerHTML=html;
+  }
+
+  /* ============ SALIN & UTIL ============ */
+  function salin(){
+    var t=window._raw||'';
+    var done=function(){
+      var b=document.getElementById('copyBtn');
+      b.classList.add('done');b.textContent='✅ TERSALIN!';
+      setTimeout(function(){b.classList.remove('done');b.textContent='📋 SALIN LAPORAN'},1600);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(done).catch(fallback);
+    }else{fallback()}
+    function fallback(){
+      var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);
+      ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
+    }
+  }
+  function clearTrip(){document.getElementById('trip').value='';render()}
+
+  /* ============ SIMPAN DATA FORM ============ */
+  function save(){
+    localStorage.setItem('spx',JSON.stringify({
+      dc:document.getElementById('dc').value,
+      pet:document.getElementById('petugas').value,
+      jns:document.getElementById('jenis').value,
+      plt:document.getElementById('plat').value
+    }));
+  }
+  function load(){
+    try{
+      var d=JSON.parse(localStorage.getItem('spx'));
+      if(d){
+        if(d.dc)document.getElementById('dc').value=d.dc;
+        if(d.pet)document.getElementById('petugas').value=d.pet;
+        if(d.jns)document.getElementById('jenis').value=d.jns;
+        if(d.plt)document.getElementById('plat').value=d.plt;
+      }
+    }catch(e){}
+  }
+
+  load();jamSekarang();initApp();
+  setInterval(function(){
+    document.getElementById('tglLabel').textContent=hariNow()+', '+tanggalNow();
+  },30000);
+</script>
+</body>
+</html>
